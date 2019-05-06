@@ -9,6 +9,12 @@ object SqlBox {
   case class SqlBoxRawValue(value:String)
   case class SqlBoxValueWrapper(wrapper:String, value:Any)
 
+  def apply(sql:String, params:Any*):SqlBox = {
+    val sqlBox = new SqlBox()
+    sqlBox.append(sql, params:_*)
+    return sqlBox
+  }
+
   def createInsert(tb:String, map: Map[String, Any]):SqlBox = {
     val sqlBox = new SqlBox()
     val columns = new StringBuilder()
@@ -72,14 +78,17 @@ class SqlBox {
   }
 
   def append(clause:String, params:Any*) = {
-    _sqlBuilder.append(clause)
+    if (clause != null) {
+      _sqlBuilder.append(clause)
+    }
     if (params != null) {
       params.foreach((param:Any) => {_paramList += param})
     }
   }
 
   def appendLine(clause:String, params:Any*) = {
-    this.append(clause + "\n", params)
+    val clauseToAppend:String = if (clause==null) null else (clause + "\n")
+    this.append(clauseToAppend, params)
   }
 
   def paramList:List[Any] = this._paramList.toList
