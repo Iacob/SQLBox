@@ -52,7 +52,7 @@ public class SqlBox4J {
     }
     static class SqlBoxRawValue {
         private String value;
-        SqlBoxRawValue(String value) {
+        public SqlBoxRawValue(String value) {
             this.value = value;
         }
         String getValue() {
@@ -62,7 +62,7 @@ public class SqlBox4J {
     static class SqlBoxValueWrapper {
         private String wrapper;
         private Object value;
-        SqlBoxValueWrapper(String wrapper, Object value) {
+        public SqlBoxValueWrapper(String wrapper, Object value) {
             this.wrapper = wrapper;
             this.value = value;
         }
@@ -74,14 +74,13 @@ public class SqlBox4J {
         }
     }
 
-    static SqlBox4J createInsert(String tb, Map<String, Object> map) {
+    public static SqlBox4J createInsert(String tb, Map<String, Object> map) {
         SqlBox4J sqlBox = new SqlBox4J();
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
-        map.forEach((k, v) -> {});
         map.forEach((k, v) -> {
             if (v instanceof SqlBoxRawValue) {
-                values.append(v).append(",");
+                values.append(((SqlBoxRawValue) v).getValue()).append(",");
             }else if (v instanceof SqlBoxValueWrapper) {
                 values.append(((SqlBoxValueWrapper) v).getWrapper()).append(",");
                 sqlBox.append(null, ((SqlBoxValueWrapper) v).getValue());
@@ -96,7 +95,7 @@ public class SqlBox4J {
         if (values.length() > 0) {
             values.deleteCharAt(values.length() - 1);
         }
-        String sql = "insert into $tb (" + columns.toString() + ") values (" + values.toString() + ")";
+        String sql = "insert into " + tb + " (" + columns.toString() + ") values (" + values.toString() + ")";
         sqlBox.append(sql, null);
         return sqlBox;
     }
@@ -149,5 +148,13 @@ public class SqlBox4J {
         this.setStatementParams(stmt);
         int rows = stmt.executeUpdate();
         return new UpdateResult(stmt, rows);
+    }
+
+    public String getSql() {
+        return this.sql.toString();
+    }
+
+    public Object[] getParams() {
+        return this.params.toArray();
     }
 }
