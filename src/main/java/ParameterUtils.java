@@ -1,3 +1,4 @@
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public class ParameterUtils {
@@ -65,5 +66,33 @@ public class ParameterUtils {
         T result = null;
         try { result = (T)resultObject; }catch (Throwable t) {}
         return result;
+    }
+
+    public static Object iterateParamValues(Object[] args, BiConsumer<String, Object> paramValueConsumer) {
+        if (args == null) {
+            return null;
+        }
+        int i = 0;
+        while (true) {
+            if (i >= args.length) {
+                return null;
+            }
+            String paramName = null;
+            try { paramName = (String) args[i]; }catch (Throwable t) {}
+            if (paramName == null) {
+                return null;
+            }
+            i++;
+
+            if (i >= args.length) {
+                return null;
+            }
+            Object paramValue = args[i];
+
+            String paramNameFormal = paramName.trim();
+            if (paramNameFormal.endsWith(":") && (paramNameFormal.length() > 0)) {
+                paramValueConsumer.accept(paramNameFormal.substring(0, (paramNameFormal.length() - 1)), paramValue);
+            }
+        }
     }
 }
